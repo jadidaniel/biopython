@@ -161,9 +161,17 @@ class InsdcScanner:
                 while line[:self.FEATURE_QUALIFIER_INDENT] == self.FEATURE_QUALIFIER_SPACER:
                     line = self.handle.readline()
             else:
-                #Build up a list of the lines making up this feature:
-                feature_key = line[2:self.FEATURE_QUALIFIER_INDENT].strip()
-                feature_lines = [line[self.FEATURE_QUALIFIER_INDENT:]]
+                # Build up a list of the lines making up this feature.
+                # Feature key and location lines handled with line splitting
+                # to allow for longer feature keys.
+                feature_key = line.split()[1]
+                
+                line1 = line[len(line.split()[0]):].lstrip()
+                feature_lines = [line1[len(line1.split()[0]):].lstrip()]
+                # OR
+                # feature_lines = [' '.join(line.split()[2:])]
+                # but this has potential to change the content
+                
                 line = self.handle.readline()
                 while line[:self.FEATURE_QUALIFIER_INDENT] == self.FEATURE_QUALIFIER_SPACER \
                 or line.rstrip() == "" : # cope with blank lines in the midst of a feature
