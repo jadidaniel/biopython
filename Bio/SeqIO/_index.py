@@ -401,6 +401,23 @@ class EmblDict(_SequentialSeqFileDict):
                         break
                 self._record_key(key, offset)
 
+class ImgtDict(_SequentialSeqFileDict):
+    """Indexed dictionary like access to an IMGT/LIGM-DB flatfile."""
+    def __init__(self, filename, alphabet, key_function):
+        _IndexedSeqFileDict.__init__(self, filename, alphabet, key_function)
+        self._format = "imgt"
+        handle = self._handle
+        marker_re = re.compile("^ID ")
+        self._marker_re = marker_re #saved for the get_raw method
+        while True:
+            offset = handle.tell()
+            line = handle.readline()
+            if not line : break #End of file
+            if marker_re.match(line):
+                # We assume the first word after ID is the accession
+                key = line.split()[1]
+                self._record_key(key, offset)
+
 class SwissDict(_SequentialSeqFileDict):
     """Indexed dictionary like access to a SwissProt file."""
     def __init__(self, filename, alphabet, key_function):
@@ -594,6 +611,7 @@ _FormatToIndexedDict = {"ace" : AceDict,
                         "genbank" : GenBankDict,
                         "gb" : GenBankDict, #alias of the above
                         "ig" : IntelliGeneticsDict,
+                        "imgt" : ImgtDict,
                         "phd" : PhdDict,
                         "pir" : PirDict,
                         "sff" : SffDict,

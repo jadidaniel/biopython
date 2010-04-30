@@ -1183,7 +1183,69 @@ class GenBankScanner(InsdcScanner):
             return
         except StopIteration:
             raise ValueError("Problem in misc lines before sequence")
+
+class ImgtScanner(EmblScanner):
+    """For extracting chunks of information in IMGT/LIGM-DB flatfiles"""
+
+    # RECORD_START = "ID   "
+    # HEADER_WIDTH = 5
+    FEATURE_START_MARKERS = ["FH   Key             Location/Qualifiers",
+                             "FH   Key             Location/Qualifiers (from EMBL)",
+                             "FH   Key                 Location/Qualifiers",
+                             "FH"]
+    FEATURE_END_MARKERS = ["XX"] #XX can also mark the end of many things!
+    FEATURE_QUALIFIER_INDENTS = {"FH   Key             Location/Qualifiers":21,
+                                 "FH   Key             Location/Qualifiers (from EMBL)":21,
+                                 "FH   Key                 Location/Qualifiers":25}
+    FEATURE_QUALIFIER_SPACERS = {"FH   Key             Location/Qualifiers":
+                                                        "FT                   ",
+                                 "FH   Key             Location/Qualifiers (from EMBL)":
+                                                        "FT                   ",
+                                 "FH   Key                 Location/Qualifiers":
+                                                        "FT                       "}
+    # FEATURE_QUALIFIER_INDENTS = [21,25]
+    # FEATURE_QUALIFIER_SPACERS = [("FT" + " " * (f-2),f) for f in FEATURE_QUALIFIER_INDENTS]
+    FEATURE_QUALIFIER_INDENT = 0    # set dynamically
+    FEATURE_QUALIFIER_SPACER = ""   # set dynamically
+    # SEQUENCE_HEADERS=["SQ", "CO"] #Remove trailing spaces
+
+    def parse_header(self):
+        """Return list of strings making up the header
+
+        New line characters are removed.
+
+        Assumes you have just read in the ID/LOCUS line.
+        """
+        assert self.line[:self.HEADER_WIDTH]==self.RECORD_START, \
+               "Not at start of record"
         
+        header_lines = []
+        while True:
+            line = self.handle.readline()
+            if not line:
+                raise ValueError("Premature end of line during sequence data")
+            line = line.rstrip()
+            if line in self.FEATURE_START_MARKERS:
+                if self.debug : print "Found header table"
+                # NOTE: if first FH found has no info on indentation, we can't
+                #       define the qualifier indent/spacer
+                if line != 'FH':
+                    # determine if the IMGT record indentation is 21 or 25 chars
+                    self.FEATURE_QUALIFIER_INDENT = self.FEATURE_QUALIFIER_INDENTS[line]
+                    self.FEATURE_QUALIFIER_SPACER = self.FEATURE_QUALIFIER_SPACERS[line]
+                break
+            #if line[:self.HEADER_WIDTH]==self.FEATURE_START_MARKER[:self.HEADER_WIDTH]:
+            #    if self.debug : print "Found header table (?)"
+            #    break
+            if line[:self.HEADER_WIDTH].rstrip() in self.SEQUENCE_HEADERS:
+                if self.debug : print "Found start of sequence"
+                break
+            if line == "//":
+                raise ValueError("Premature end of sequence data marker '//' found")
+            header_lines.append(line)
+        self.line = line
+        return header_lines
+
 if __name__ == "__main__":
     from StringIO import StringIO
 
