@@ -26,7 +26,7 @@ http://www.ddbj.nig.ac.jp/
 """
 
 from Bio.Seq import UnknownSeq
-from Bio.GenBank.Scanner import GenBankScanner, EmblScanner
+from Bio.GenBank.Scanner import GenBankScanner, EmblScanner, ImgtScanner
 from Bio import Alphabet
 from Interfaces import SequentialSequenceWriter
 from Bio import SeqFeature
@@ -60,6 +60,17 @@ def EmblIterator(handle):
     one record."""
     #This calls a generator function:
     return EmblScanner(debug=0).parse_records(handle)
+
+def ImgtIterator(handle):
+    """Breaks up an IMGT/LIGM-DB flatfile into SeqRecord objects.
+
+    Every section from the LOCUS line to the terminating // becomes
+    a single SeqRecord with associated annotation and features.
+    
+    Note that for genomes or chromosomes, there is typically only
+    one record."""
+    #This calls a generator function:
+    return ImgtScanner(debug=0).parse_records(handle)
 
 def GenBankCdsFeatureIterator(handle, alphabet=Alphabet.generic_protein):
     """Breaks up a Genbank file into SeqRecord objects for each CDS feature.
