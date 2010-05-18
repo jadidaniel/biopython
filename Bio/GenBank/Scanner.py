@@ -171,7 +171,6 @@ class InsdcScanner:
                     #over indenting the location and qualifiers.
                     feature_key, line = line[2:].strip().split(None,1)
                     feature_lines = [line]
-                    import warnings
                     warnings.warn("Overindented %s feature?" % feature_key)
                 else:
                     feature_key = line[2:self.FEATURE_QUALIFIER_INDENT].strip()
@@ -843,10 +842,13 @@ class _ImgtScanner(EmblScanner):
                     #start in column 26 (one-based).
                     feature_key = line[2:25].strip()
                     location_start = line[25:].strip()
-                if location_start == "1.":
-                    #Nasty hack for common IMGT bug, probably should be 1..end
-                    #if we had the sequence length information here.
-                    location_start = "1"
+                if location_start.endswith("."):
+                    #Nasty hack for current IMGT bugs like "1." and "13."
+                    #Hard to say what the feature is really meant to be.
+                    warnings.warn("Feature location %s is invalid, treating "
+                                  "as %s" % (repr(location_start),
+                                             repr(location_start.strip("."))))
+                    location_start = location_start.strip(".")
                 if ">" in location_start:
                     #Nasty hack for common IMGT bug, should be >123 not 123>
                     #in a location string.
