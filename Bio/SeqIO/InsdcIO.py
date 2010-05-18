@@ -990,6 +990,11 @@ class EmblWriter(_InsdcWriter):
         self._write_sequence(record)
         handle.write("//\n")
 
+class ImgtWriter(EmblWriter):
+    HEADER_WIDTH = 5
+    QUALIFIER_INDENT = 25 # Not 21 as in EMBL
+    QUALIFIER_INDENT_STR = "FT" + " "*(QUALIFIER_INDENT-2)
+    QUALIFIER_INDENT_TMP = "FT   %s                    " # 25 if %s is empty
 
 if __name__ == "__main__":
     print "Quick self test"

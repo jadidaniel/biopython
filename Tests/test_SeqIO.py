@@ -30,7 +30,7 @@ nucleotide_alphas = [Alphabet.generic_nucleotide,
                      Alphabet.Gapped(Alphabet.generic_nucleotide)]
 no_alpha_formats = ["fasta","clustal","phylip","tab","ig","stockholm","emboss",
                     "fastq","fastq-solexa","fastq-illumina","qual"]
-possible_unknown_seq_formats = ["qual", "genbank", "gb", "embl"]
+possible_unknown_seq_formats = ["qual", "genbank", "gb", "embl", "imgt"]
 
 #List of formats including alignment only file formats we can read AND write.
 #The list is initially hard coded to preserve the original order of the unit
@@ -357,7 +357,7 @@ def check_simple_write_read(records, indent=" "):
             assert len(r1) == len(r2)
 
             #Check the sequence
-            if format in ["gb", "genbank", "embl"]:
+            if format in ["gb", "genbank", "embl", "imgt"]:
                 #The GenBank/EMBL parsers will convert to upper case.
                 if isinstance(r1.seq, UnknownSeq) \
                 and isinstance(r2.seq, UnknownSeq):
