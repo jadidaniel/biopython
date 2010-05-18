@@ -141,6 +141,7 @@ test_files = [ \
     ("embl",   False, 'EMBL/AE017046.embl', 1), #See also NC_005816.gb
     ("embl",   False, 'EMBL/Human_contigs.embl', 2), #contigs, no sequences
     ("embl",   False, 'EMBL/A04195.imgt', 1), # features over indented for EMBL
+    ("imgt",   False, 'EMBL/A04195.imgt', 1), # features over indented for EMBL
     ("stockholm", True,  'Stockholm/simple.sth', 2),
     ("stockholm", True,  'Stockholm/funny.sth', 5),
 #Following PHYLIP files are currently only used here and in test_AlignIO.py,

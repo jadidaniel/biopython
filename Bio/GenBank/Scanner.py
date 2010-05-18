@@ -515,6 +515,7 @@ class InsdcScanner:
 
                     yield record
 
+
 class EmblScanner(InsdcScanner):
     """For extracting chunks of information in EMBL files"""
 
@@ -771,6 +772,93 @@ class EmblScanner(InsdcScanner):
             return
         except StopIteration:
             raise ValueError("Problem in misc lines before sequence")
+
+
+class _ImgtScanner(EmblScanner):
+    """For extracting chunks of information in IMGT (EMBL like) files (PRIVATE).
+    
+    IMGT files are like EMBL files but in order to allow longer feature types
+    the features should be indented by 25 characters not 21 characters. In
+    practice the IMGT flat files tend to use either 21 or 25 characters, so we
+    must cope with both.
+    
+    This is private to encourage use of Bio.SeqIO rather than Bio.GenBank.
+    """
+
+    FEATURE_START_MARKERS = ["FH   Key             Location/Qualifiers",
+                             "FH   Key             Location/Qualifiers (from EMBL)",
+                             "FH   Key                 Location/Qualifiers",
+                             "FH"]
+
+    def parse_features(self, skip=False):
+        """Return list of tuples for the features (if present)
+
+        Each feature is returned as a tuple (key, location, qualifiers)
+        where key and location are strings (e.g. "CDS" and
+        "complement(join(490883..490885,1..879))") while qualifiers
+        is a list of two string tuples (feature qualifier keys and values).
+
+        Assumes you have already read to the start of the features table.
+        """
+        if self.line.rstrip() not in self.FEATURE_START_MARKERS:
+            if self.debug : print "Didn't find any feature table"
+            return []
+        
+        while self.line.rstrip() in self.FEATURE_START_MARKERS:
+            self.line = self.handle.readline()
+
+        features = []
+        line = self.line
+        while True:
+            if not line:
+                raise ValueError("Premature end of line during features table")
+            if line[:self.HEADER_WIDTH].rstrip() in self.SEQUENCE_HEADERS:
+                if self.debug : print "Found start of sequence"
+                break
+            line = line.rstrip()
+            if line == "//":
+                raise ValueError("Premature end of features table, marker '//' found")
+            if line in self.FEATURE_END_MARKERS:
+                if self.debug : print "Found end of features"
+                line = self.handle.readline()
+                break
+            if line[2:self.FEATURE_QUALIFIER_INDENT].strip() == "":
+                raise ValueError("Expected a feature qualifier in line '%s'" % line)
+
+            if skip:
+                line = self.handle.readline()
+                while line[:self.FEATURE_QUALIFIER_INDENT] == self.FEATURE_QUALIFIER_SPACER:
+                    line = self.handle.readline()
+            else:
+                assert line[:2] == "FT"
+                try:
+                    feature_key, location_start = line[2:].strip().split()
+                except ValueError:
+                    #e.g. "FT   TRANSMEMBRANE-REGION2163..2240\n"
+                    #Assume indent of 25 as per IMGT spec, with the location
+                    #start in column 26 (one-based).
+                    feature_key = line[2:25].strip()
+                    location_start = line[25:].strip()
+                if location_start == "1.":
+                    #Nasty hack for common IMGT bug, probably should be 1..end
+                    #if we had the sequence length information here.
+                    location_start = "1"
+                if location_start.endswith(">"):
+                    #Nasty hack for common IMGT bug, should be >123 not 123>
+                    #in a location string. TODO - reinsert the ">" char.
+                    location_start = location_start[:-1]
+                feature_lines = [location_start]
+                line = self.handle.readline()
+                while line[:self.FEATURE_QUALIFIER_INDENT] == self.FEATURE_QUALIFIER_SPACER \
+                or line.rstrip() == "" : # cope with blank lines in the midst of a feature
+                    #Use strip to remove any harmless trailing white space AND and leading
+                    #white space (copes with 21 or 26 indents and orther variants)
+                    assert line[:2] == "FT"
+                    feature_lines.append(line[self.FEATURE_QUALIFIER_INDENT:].strip())
+                    line = self.handle.readline()
+                features.append(self.parse_feature(feature_key, feature_lines))
+        self.line = line
+        return features
 
 class GenBankScanner(InsdcScanner):
     """For extracting chunks of information in GenBank files"""

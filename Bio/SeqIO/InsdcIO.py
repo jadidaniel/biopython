@@ -8,7 +8,7 @@
 
 You are expected to use this module via the Bio.SeqIO functions.
 Note that internally this module calls Bio.GenBank to do the actual
-parsing of both GenBank and EMBL files.
+parsing of GenBank, EMBL and IMGT files.
 
 See also:
 
@@ -23,17 +23,23 @@ http://www.ebi.ac.uk/embl/
 
 DDBJ (DNA Data Bank of Japan)
 http://www.ddbj.nig.ac.jp/
+
+IMGT (use a variant of EMBL format with longer feature indents)
+http://imgt.cines.fr/download/LIGM-DB/userman_doc.html
+http://imgt.cines.fr/download/LIGM-DB/ftable_doc.html
+http://www.ebi.ac.uk/imgt/hla/docs/manual.html
+
 """
 
 from Bio.Seq import UnknownSeq
-from Bio.GenBank.Scanner import GenBankScanner, EmblScanner
+from Bio.GenBank.Scanner import GenBankScanner, EmblScanner, _ImgtScanner
 from Bio import Alphabet
 from Interfaces import SequentialSequenceWriter
 from Bio import SeqFeature
 
 # NOTE
 # ====
-# The "brains" for parsing GenBank and EMBL files (and any
+# The "brains" for parsing GenBank, EMBL and IMGT files (and any
 # other flat file variants from the INSDC in future) is in
 # Bio.GenBank.Scanner (plus the _FeatureConsumer in Bio.GenBank)
 # However, all the writing code is in this file.
@@ -60,6 +66,17 @@ def EmblIterator(handle):
     one record."""
     #This calls a generator function:
     return EmblScanner(debug=0).parse_records(handle)
+
+def ImgtIterator(handle):
+    """Breaks up an IMGT file into SeqRecord objects.
+
+    Every section from the LOCUS line to the terminating // becomes
+    a single SeqRecord with associated annotation and features.
+    
+    Note that for genomes or chromosomes, there is typically only
+    one record."""
+    #This calls a generator function:
+    return _ImgtScanner(debug=0).parse_records(handle)
 
 def GenBankCdsFeatureIterator(handle, alphabet=Alphabet.generic_protein):
     """Breaks up a Genbank file into SeqRecord objects for each CDS feature.
