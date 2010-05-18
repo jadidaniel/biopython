@@ -408,6 +408,12 @@ class EmblDict(_SequentialSeqFileDict):
                         break
                 self._record_key(key, offset)
 
+class ImgtDict(EmblDict):
+    """Indexed dictionary like access to an EMBL-like IMGT file."""
+    def __init__(self, filename, alphabet, key_function):
+        EmblDict.__init__(self, filename, alphabet, key_function)
+        self._format = "imgt"
+
 class SwissDict(_SequentialSeqFileDict):
     """Indexed dictionary like access to a SwissProt file."""
     def __init__(self, filename, alphabet, key_function):
@@ -601,6 +607,7 @@ _FormatToIndexedDict = {"ace" : AceDict,
                         "genbank" : GenBankDict,
                         "gb" : GenBankDict, #alias of the above
                         "ig" : IntelliGeneticsDict,
+                        "imgt" : ImgtDict,
                         "phd" : PhdDict,
                         "pir" : PirDict,
                         "sff" : SffDict,
