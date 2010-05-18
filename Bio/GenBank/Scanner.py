@@ -1,4 +1,5 @@
 # Copyright 2007-2010 by Peter Cock.  All rights reserved.
+# Revisions copyright 2010 by Uri Laserson.  All rights reserved.
 # This code is part of the Biopython distribution and governed by its
 # license.  Please see the LICENSE file that should have been included
 # as part of this package.
@@ -26,6 +27,7 @@
 
 import warnings
 import os
+import re
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import generic_alphabet, generic_protein
@@ -807,6 +809,8 @@ class _ImgtScanner(EmblScanner):
         while self.line.rstrip() in self.FEATURE_START_MARKERS:
             self.line = self.handle.readline()
 
+        bad_position_re = re.compile(r'([0-9]+)>{1}')
+        
         features = []
         line = self.line
         while True:
@@ -843,10 +847,10 @@ class _ImgtScanner(EmblScanner):
                     #Nasty hack for common IMGT bug, probably should be 1..end
                     #if we had the sequence length information here.
                     location_start = "1"
-                if location_start.endswith(">"):
+                if ">" in location_start:
                     #Nasty hack for common IMGT bug, should be >123 not 123>
-                    #in a location string. TODO - reinsert the ">" char.
-                    location_start = location_start[:-1]
+                    #in a location string.
+                    location_start = bad_position_re.sub(r'>\1',location_start)
                 feature_lines = [location_start]
                 line = self.handle.readline()
                 while line[:self.FEATURE_QUALIFIER_INDENT] == self.FEATURE_QUALIFIER_SPACER \
