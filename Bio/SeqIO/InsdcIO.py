@@ -729,6 +729,7 @@ class EmblWriter(_InsdcWriter):
     QUALIFIER_INDENT = 21
     QUALIFIER_INDENT_STR = "FT" + " "*(QUALIFIER_INDENT-2)
     QUALIFIER_INDENT_TMP = "FT   %s                " # 21 if %s is empty
+    FEATURE_HEADER = "FH   Key             Location/Qualifiers\n"
     
     def _write_contig(self, record):
         max_len = self.MAX_WIDTH - self.HEADER_WIDTH
@@ -983,7 +984,7 @@ class EmblWriter(_InsdcWriter):
         if "comment" in record.annotations:
             self._write_comment(record)
 
-        handle.write("FH   Key             Location/Qualifiers\n")
+        handle.write(self.FEATURE_HEADER)
         for feature in record.features:
             self._write_feature(feature) 
 
@@ -995,6 +996,7 @@ class ImgtWriter(EmblWriter):
     QUALIFIER_INDENT = 25 # Not 21 as in EMBL
     QUALIFIER_INDENT_STR = "FT" + " "*(QUALIFIER_INDENT-2)
     QUALIFIER_INDENT_TMP = "FT   %s                    " # 25 if %s is empty
+    FEATURE_HEADER = "FH   Key                 Location/Qualifiers\n"
 
 if __name__ == "__main__":
     print "Quick self test"
