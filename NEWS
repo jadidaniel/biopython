@@ -24,7 +24,8 @@ Several small issues with Bio.PDB have been resolved, which includes better
 handling of model numbers, and files missing the element column.
 
 Feature location parsing for GenBank and EMBL files has been rewritten,
-making the parser much faster.
+making the parser much faster. Additionally the IMGT variant of the EMBL
+flat file format is also supported (format name "imgt" in Bio.SeqIO).
 
 Ace parsing by SeqIO now uses zero rather than None for the quality score of
 any gaps (insertions) in the contig sequence.
@@ -42,6 +43,7 @@ Konstantin Okonechnikov (first contribution)
 Michiel de Hoon
 Peter Cock
 Tiago Antao
+Uri Laserson (first contribution)
 
 ===================================================================
 
