@@ -26,6 +26,8 @@ handling of model numbers, and files missing the element column.
 Feature location parsing for GenBank and EMBL files has been rewritten,
 making the parser much faster. Additionally the IMGT variant of the EMBL
 flat file format is also supported (format name "imgt" in Bio.SeqIO).
+Note that there are some malformed records in the current IMGT release,
+which can be parsed but with warnings. The IMGT curators have been informed.
 
 Ace parsing by SeqIO now uses zero rather than None for the quality score of
 any gaps (insertions) in the contig sequence.
