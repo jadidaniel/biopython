@@ -846,17 +846,6 @@ class _ImgtScanner(EmblScanner):
                     #start in column 26 (one-based).
                     feature_key = line[2:25].strip()
                     location_start = line[25:].strip()
-                if location_start.endswith("."):
-                    #Nasty hack for current IMGT bugs like "1." and "13."
-                    #Hard to say what the feature is really meant to be.
-                    warnings.warn("Feature location %s is invalid, treating "
-                                  "as %s" % (repr(location_start),
-                                             repr(location_start.strip("."))))
-                    location_start = location_start.strip(".")
-                if ">" in location_start:
-                    #Nasty hack for common IMGT bug, should be >123 not 123>
-                    #in a location string.
-                    location_start = bad_position_re.sub(r'>\1',location_start)
                 feature_lines = [location_start]
                 line = self.handle.readline()
                 while line[:self.FEATURE_QUALIFIER_INDENT] == self.FEATURE_QUALIFIER_SPACER \
@@ -866,7 +855,25 @@ class _ImgtScanner(EmblScanner):
                     assert line[:2] == "FT"
                     feature_lines.append(line[self.FEATURE_QUALIFIER_INDENT:].strip())
                     line = self.handle.readline()
-                features.append(self.parse_feature(feature_key, feature_lines))
+                feature_key, location, qualifiers = \
+                                self.parse_feature(feature_key, feature_lines)
+                #Try to handle known problems with IMGT locations here:
+                if location.endswith("."):
+                    #Nasty hack for current IMGT bugs like "1." and "13."
+                    #Hard to say what the feature is really meant to be.
+                    warnings.warn("Feature location %s is invalid, treating "
+                                  "as %s" % (repr(location),
+                                             repr(location.strip("."))))
+                    location = location.strip(".")
+                if ">" in location:
+                    #Nasty hack for common IMGT bug, should be >123 not 123>
+                    #in a location string. At least here the meaning is clear, 
+                    #and since it is so common I don't want to issue a warning
+                    #warnings.warn("Feature location %s is invalid, "
+                    #              "moving greater than sign before position"
+                    #              % location)
+                    location = bad_position_re.sub(r'>\1',location)
+                features.append((feature_key, location, qualifiers))
         self.line = line
         return features
 
