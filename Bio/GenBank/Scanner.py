@@ -858,13 +858,13 @@ class _ImgtScanner(EmblScanner):
                 feature_key, location, qualifiers = \
                                 self.parse_feature(feature_key, feature_lines)
                 #Try to handle known problems with IMGT locations here:
-                if location.endswith("."):
-                    #Nasty hack for current IMGT bugs like "1." and "13."
-                    #Hard to say what the feature is really meant to be.
-                    warnings.warn("Feature location %s is invalid, treating "
-                                  "as %s" % (repr(location),
-                                             repr(location.strip("."))))
-                    location = location.strip(".")
+                # if location.endswith("."):
+                #     #Nasty hack for current IMGT bugs like "1." and "13."
+                #     #Hard to say what the feature is really meant to be.
+                #     warnings.warn("Feature location %s is invalid, treating "
+                #                   "as %s" % (repr(location),
+                #                              repr(location.strip("."))))
+                #     location = location.strip(".")
                 if ">" in location:
                     #Nasty hack for common IMGT bug, should be >123 not 123>
                     #in a location string. At least here the meaning is clear, 
@@ -874,24 +874,24 @@ class _ImgtScanner(EmblScanner):
                     #              % location)
                     location = bad_position_re.sub(r'>\1',location)
                 #TODO - Remove these hacks once the IMGT update their data file
-                if location == "join(523":
-                    warnings.warn("Attempting to fix known bad location 'join(523' found in M97158")
-                    location = "523"
-                if location == "complement(join(<1264..1394),2768..2813,9086..9281,15560..15654,17022..17053,17109..17129,17256..17549,17632..17713,23004..23118,23202..23326)":
-                    warnings.warn("Attempting to fix known bad location in NW_938839")
-                    location = "complement(join(<1264..1394,2768..2813,9086..9281,15560..15654,17022..17053,17109..17129,17256..17549,17632..17713,23004..23118,23202..23326))"
-                if location == "complement(join(7195..7372),16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266)":
-                    warnings.warn("Attempting to fix known bad location #1 in NW_001494075")
-                    location = "complement(join(7195..7372,16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266))"
-                if location == "complement(join(7196..7372),16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266)":
-                    warnings.warn("Attempting to fix known bad location #2 in NW_001494075")
-                    location = "complement(join(7196..7372,16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266))"
-                if location == "complement(join(29645..29917),30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467)":
-                    warnings.warn("Attempting to fix known bad location #3 in NW_001494075")
-                    location = "complement(join(29645..29917,30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467))"
-                if location == "complement(join(29909..29917),30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467)":
-                    warnings.warn("Attempting to fix known bad location #4 in NW_001494075")
-                    location = "complement(join(29909..29917,30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467))"
+                # if location == "join(523":
+                #     warnings.warn("Attempting to fix known bad location 'join(523' found in M97158")
+                #     location = "523"
+                # if location == "complement(join(<1264..1394),2768..2813,9086..9281,15560..15654,17022..17053,17109..17129,17256..17549,17632..17713,23004..23118,23202..23326)":
+                #     warnings.warn("Attempting to fix known bad location in NW_938839")
+                #     location = "complement(join(<1264..1394,2768..2813,9086..9281,15560..15654,17022..17053,17109..17129,17256..17549,17632..17713,23004..23118,23202..23326))"
+                # if location == "complement(join(7195..7372),16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266)":
+                #     warnings.warn("Attempting to fix known bad location #1 in NW_001494075")
+                #     location = "complement(join(7195..7372,16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266))"
+                # if location == "complement(join(7196..7372),16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266)":
+                #     warnings.warn("Attempting to fix known bad location #2 in NW_001494075")
+                #     location = "complement(join(7196..7372,16719..16899,17110..17256,21350..21670,21775..22099,22347..22408,23349..23567,23672..23699,23917..24006,24147..24470,25066..25116,25197..25266))"
+                # if location == "complement(join(29645..29917),30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467)":
+                #     warnings.warn("Attempting to fix known bad location #3 in NW_001494075")
+                #     location = "complement(join(29645..29917,30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467))"
+                # if location == "complement(join(29909..29917),30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467)":
+                #     warnings.warn("Attempting to fix known bad location #4 in NW_001494075")
+                #     location = "complement(join(29909..29917,30019..30134,32107..32439,32571..32885,33137..33469,33544..33867,38066..38104,38443..38467))"
                 features.append((feature_key, location, qualifiers))
         self.line = line
         return features
